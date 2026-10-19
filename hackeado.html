@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SISTEMA COMPROMETIDO</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { width: 100%; height: 100%; background: #000; overflow: hidden; font-family: "Courier New", monospace; }
+  canvas { position: fixed; inset: 0; width: 100%; height: 100%; }
+  .box {
+    position: fixed; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 88%; max-width: 560px;
+    padding: 24px 18px;
+    background: rgba(0, 0, 0, 0.82);
+    border: 2px solid #ff1e1e;
+    box-shadow: 0 0 25px #ff1e1e, inset 0 0 25px rgba(255, 30, 30, 0.25);
+    text-align: center;
+    color: #00ff41;
+    z-index: 2;
+  }
+  h1 {
+    color: #ff1e1e;
+    font-size: clamp(22px, 7vw, 40px);
+    letter-spacing: 3px;
+    text-shadow: 0 0 10px #ff1e1e;
+    animation: glitch 1.2s infinite;
+  }
+  .skull { font-size: 48px; margin-bottom: 8px; }
+  #msg {
+    margin: 18px 0;
+    min-height: 120px;
+    font-size: clamp(14px, 4vw, 18px);
+    line-height: 1.6;
+    text-align: left;
+    white-space: pre-wrap;
+    text-shadow: 0 0 6px #00ff41;
+  }
+  .cursor { display: inline-block; width: 9px; background: #00ff41; animation: blink 0.7s infinite; }
+  #timer {
+    color: #ff1e1e;
+    font-size: clamp(24px, 8vw, 36px);
+    font-weight: bold;
+    text-shadow: 0 0 10px #ff1e1e;
+  }
+  .bar { height: 10px; border: 1px solid #00ff41; margin-top: 14px; }
+  .bar div { height: 100%; width: 0; background: #00ff41; box-shadow: 0 0 10px #00ff41; }
+  #zoeira {
+    position: fixed; inset: 0; z-index: 10;
+    display: none; align-items: center; justify-content: center; flex-direction: column;
+    background: #000; color: #00ff41; text-align: center; padding: 20px;
+  }
+  #zoeira h2 { font-size: clamp(28px, 9vw, 48px); margin-bottom: 12px; }
+  #zoeira p { font-size: clamp(16px, 5vw, 22px); }
+  @keyframes blink { 50% { opacity: 0; } }
+  @keyframes glitch {
+    0%, 100% { transform: translate(0); }
+    20% { transform: translate(-2px, 1px); }
+    40% { transform: translate(2px, -1px); }
+    60% { transform: translate(-1px, -2px); }
+    80% { transform: translate(1px, 2px); }
+  }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+
+<div class="box">
+  <div class="skull">💀</div>
+  <h1>VOCÊ FOI HACKEADO</h1>
+  <div id="msg"></div>
+  <div id="timer">00:60</div>
+  <div class="bar"><div id="fill"></div></div>
+</div>
+
+<div id="zoeira">
+  <h2>😂 ZOEIRA!</h2>
+  <p>Calma, não foi hackeado de verdade.<br>Foi só uma brincadeira.</p>
+</div>
+
+<script>
+// ===== Chuva verde (Matrix) =====
+const canvas = document.getElementById("matrix");
+const ctx = canvas.getContext("2d");
+const chars = "01アイウエオカキクケコサシスセソタチツテトナニヌネノ$#@%&*<>{}[]";
+let fontSize = 16, drops = [];
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const cols = Math.floor(canvas.width / fontSize);
+  drops = Array(cols).fill(0).map(() => Math.random() * -50);
+}
+resize();
+window.addEventListener("resize", resize);
+
+function draw() {
+  ctx.fillStyle = "rgba(0, 0, 0, 0.06)";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.font = fontSize + "px monospace";
+  for (let i = 0; i < drops.length; i++) {
+    const ch = chars[Math.floor(Math.random() * chars.length)];
+    ctx.fillStyle = Math.random() > 0.97 ? "#ffffff" : "#00ff41";
+    ctx.fillText(ch, i * fontSize, drops[i] * fontSize);
+    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+setInterval(draw, 40);
+
+// ===== Mensagem digitando =====
+const lines = [
+  "> Acesso ao dispositivo: CONCEDIDO",
+  "> Copiando arquivos e contatos...",
+  "> Fotos, conversas e senhas: CAPTURADAS",
+  "",
+  "Seus dados foram criptografados.",
+  "Não desligue o aparelho."
+].join("\n");
+
+const msg = document.getElementById("msg");
+let idx = 0;
+function type() {
+  msg.innerHTML = lines.slice(0, idx).replace(/\n/g, "<br>") + '<span class="cursor">&nbsp;</span>';
+  if (idx < lines.length) { idx++; setTimeout(type, 45); }
+}
+type();
+
+// ===== Contagem regressiva =====
+const timer = document.getElementById("timer");
+const fill = document.getElementById("fill");
+const TOTAL = 60;
+let t = TOTAL;
+const cd = setInterval(() => {
+  t--;
+  timer.textContent = "00:" + String(Math.max(t, 0)).padStart(2, "0");
+  fill.style.width = ((TOTAL - t) / TOTAL * 100) + "%";
+  if (t <= 0) { clearInterval(cd); reveal(); }
+}, 1000);
+
+// ===== Revelar a zoeira =====
+const zoeira = document.getElementById("zoeira");
+function reveal() { zoeira.style.display = "flex"; }
+
+// Toque 3x rápido na tela também revela a brincadeira
+let taps = 0, tapTimer;
+document.addEventListener("click", () => {
+  taps++;
+  clearTimeout(tapTimer);
+  tapTimer = setTimeout(() => taps = 0, 600);
+  if (taps >= 3) { reveal(); taps = 0; }
+});
+</script>
+</body>
+</html>
